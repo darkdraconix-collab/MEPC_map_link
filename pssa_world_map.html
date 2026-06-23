@@ -1,0 +1,119 @@
+
+<style>
+  #map2 { width: 100%; height: 580px; border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); }
+  .tt { position: absolute; background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-lg); padding: 12px 14px; font-size: 13px; max-width: 270px; pointer-events: none; z-index: 9999; display: none; }
+  .tt-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 6px; }
+  .tt-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 8px; margin-bottom: 2px; }
+  .tt-value { font-size: 12px; color: var(--color-text-primary); line-height: 1.5; }
+  .tt-mepc { font-size: 11px; color: #185FA5; margin-top: 6px; font-weight: 500; }
+  .legend-wrap { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 8px 4px 0; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--color-text-secondary); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; opacity: 0.8; }
+</style>
+
+<div id="map2"></div>
+<div class="legend-wrap" id="legend"></div>
+<div class="tt" id="tt2"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+
+<script>
+const colors = [
+  '#1D9E75','#378ADD','#D85A30','#7F77DD','#BA7517',
+  '#D4537E','#639922','#E24B4A','#0F6E56','#993C1D',
+  '#534AB7','#185FA5','#3B6D11','#993556','#854F0B',
+  '#A32D2D','#0C447C','#3C3489'
+];
+
+const pssas = [
+  { name:"Great Barrier Reef Region", no:1, state:"Australia", measures:"IMO-recommended Australian system of pilotage; mandatory ship reporting system", mepc:"MEPC.44(30) — 16 Nov 1990", center:[-18,148.5], rx:4.5, ry:3.5, tilt:20 },
+  { name:"Torres Strait Extension", no:"1b", state:"Australia, Papua New Guinea", measures:"IMO-recommended Australian system of pilotage; two-way route", mepc:"MEPC.133(53) — 22 July 2005", center:[-9.9,142.5], rx:1.2, ry:0.9, tilt:10 },
+  { name:"South-West Coral Sea Extension", no:"1c", state:"Australia", measures:"Area to be avoided; traffic separation systems", mepc:"MEPC.268(68) — May 2015", center:[-23.5,152.5], rx:3, ry:1.8, tilt:15 },
+  { name:"Archipelago of Sabana-Camagüey", no:2, state:"Cuba", measures:"Area to be avoided", mepc:"MEPC.74(40) — 25 Sep 1997", center:[22.8,-79.5], rx:3.2, ry:1.0, tilt:-10 },
+  { name:"Sea area around Malpelo Island", no:3, state:"Colombia", measures:"Area to be avoided", mepc:"MEPC.97(47) — 8 Mar 2002", center:[4.0,-81.6], rx:1.2, ry:1.4, tilt:0 },
+  { name:"Sea area around the Florida Keys", no:4, state:"United States", measures:"Areas to be avoided; mandatory no anchoring areas", mepc:"MEPC.98(47) — 8 Mar 2002", center:[24.6,-81.5], rx:2.5, ry:0.9, tilt:-20 },
+  { name:"Wadden Sea", no:5, state:"Netherlands, Denmark, Germany", measures:"Mandatory deep water route", mepc:"MEPC.101(48) — 11 Oct 2002", center:[54.5,8.2], rx:1.5, ry:1.1, tilt:10 },
+  { name:"Paracas National Reserve", no:6, state:"Peru", measures:"Area to be avoided", mepc:"MEPC.106(49) — 18 July 2003", center:[-13.8,-76.2], rx:1.2, ry:1.5, tilt:5 },
+  { name:"Western European Waters", no:7, state:"Belgium, France, Ireland, Portugal, Spain, United Kingdom", measures:"Mandatory ship reporting system", mepc:"MEPC.121(52) — 15 Oct 2004", center:[47,-8], rx:8, ry:6, tilt:-5 },
+  { name:"Canary Islands", no:8, state:"Spain", measures:"Areas to be avoided; traffic separation systems; recommended routes; mandatory ship reporting system", mepc:"MEPC.134(53) — 22 Mar 2004", center:[28.2,-15.5], rx:2, ry:1.2, tilt:0 },
+  { name:"Galapagos Archipelago", no:9, state:"Ecuador", measures:"Area to be avoided; mandatory ship reporting system; recommended tracks", mepc:"MEPC.135(53) — 22 Mar 2004", center:[-0.5,-90.5], rx:2, ry:2, tilt:0 },
+  { name:"Baltic Sea Area", no:10, state:"Denmark, Estonia, Finland, Germany, Latvia, Lithuania, Poland, Sweden", measures:"Traffic separation schemes; deepwater route; areas to be avoided; mandatory ship reporting system; MARPOL Special Area; MARPOL SOx ECA", mepc:"MEPC.136(53) — 22 Mar 2004", center:[59,19], rx:7, ry:4.5, tilt:15 },
+  { name:"Papahānaumokuākea Marine National Monument", no:11, state:"United States", measures:"Areas to be avoided; recommended/mandatory ship reporting system", mepc:"MEPC.171(57) — 4 April 2008", center:[25.5,-169], rx:8, ry:2, tilt:0 },
+  { name:"Strait of Bonifacio", no:12, state:"France, Italy", measures:"Recommendation on navigation", mepc:"MEPC.204(62) — 15 July 2011", center:[41.3,9.1], rx:0.7, ry:0.5, tilt:0 },
+  { name:"Saba Bank", no:13, state:"Netherlands (Kingdom of the)", measures:"Area to be avoided; mandatory no anchoring area", mepc:"MEPC.226(64) — 5 Oct 2012", center:[17.6,-63.4], rx:0.6, ry:0.5, tilt:0 },
+  { name:"Jomard Entrance", no:14, state:"Papua New Guinea", measures:"Routeing system (four two-way routes and a precautionary area)", mepc:"MEPC.283(70) — 28 October 2016", center:[-10.5,152], rx:1.2, ry:0.9, tilt:10 },
+  { name:"Tubbataha Reefs Natural Park", no:15, state:"Philippines", measures:"Area to be avoided", mepc:"MEPC.294(71) — 7 July 2017", center:[9,120], rx:0.8, ry:1.0, tilt:0 },
+  { name:"North-Western Mediterranean Sea", no:16, state:"France, Italy, Monaco, Spain", measures:"Speed reductions; appropriate safety distances; broadcasting the position of cetaceans; reporting of all collisions", mepc:"MEPC.380(80) — 7 July 2023", center:[40.5,4.5], rx:5, ry:3, tilt:-10 }
+];
+
+function ellipseLatLngs(centerLat, centerLng, rxDeg, ryDeg, tiltDeg, steps) {
+  steps = steps || 64;
+  const tilt = tiltDeg * Math.PI / 180;
+  const pts = [];
+  for (let i = 0; i < steps; i++) {
+    const angle = (2 * Math.PI * i) / steps;
+    const x = rxDeg * Math.cos(angle);
+    const y = ryDeg * Math.sin(angle);
+    const xr = x * Math.cos(tilt) - y * Math.sin(tilt);
+    const yr = x * Math.sin(tilt) + y * Math.cos(tilt);
+    pts.push([centerLat + yr, centerLng + xr]);
+  }
+  pts.push(pts[0]);
+  return pts;
+}
+
+const map = L.map('map2', { zoomControl: true, scrollWheelZoom: true }).setView([20, 10], 2);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© OpenStreetMap © CartoDB',
+  subdomains: 'abcd', maxZoom: 19
+}).addTo(map);
+
+const tt = document.getElementById('tt2');
+const legend = document.getElementById('legend');
+
+pssas.forEach((p, i) => {
+  const col = colors[i % colors.length];
+  const latlngs = ellipseLatLngs(p.center[0], p.center[1], p.rx, p.ry, p.tilt || 0);
+
+  const poly = L.polygon(latlngs, {
+    color: col,
+    fillColor: col,
+    fillOpacity: 0.35,
+    weight: 2
+  }).addTo(map);
+
+  const li = document.createElement('div');
+  li.className = 'legend-item';
+  li.innerHTML = `<div class="legend-dot" style="background:${col}"></div><span>${p.no}. ${p.name}</span>`;
+  legend.appendChild(li);
+
+  poly.on('mouseover', function() {
+    this.setStyle({ fillOpacity: 0.65, weight: 3 });
+    tt.style.display = 'block';
+    tt.innerHTML = `
+      <div class="tt-title" style="color:${col}">${p.name}</div>
+      <div class="tt-label">No.</div><div class="tt-value">${p.no}</div>
+      <div class="tt-label">Proposing State(s)</div><div class="tt-value">${p.state}</div>
+      <div class="tt-label">Associated Protective Measures</div><div class="tt-value">${p.measures}</div>
+      <div class="tt-mepc">📋 ${p.mepc}</div>
+    `;
+  });
+
+  poly.on('mousemove', function(e) {
+    const cr = map.getContainer().getBoundingClientRect();
+    const x = e.originalEvent.clientX - cr.left;
+    const y = e.originalEvent.clientY - cr.top;
+    const tw = tt.offsetWidth || 270;
+    const th = tt.offsetHeight || 180;
+    tt.style.left = (x + 14 + tw > cr.width ? x - tw - 10 : x + 14) + 'px';
+    tt.style.top  = (y + 14 + th > cr.height ? y - th - 10 : y + 14) + 'px';
+  });
+
+  poly.on('mouseout', function() {
+    this.setStyle({ fillOpacity: 0.35, weight: 2 });
+    tt.style.display = 'none';
+  });
+});
+</script>

@@ -1,0 +1,165 @@
+
+<style>
+  #map4 { width: 100%; height: 560px; border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); }
+  .tt {
+    position: absolute; z-index: 9999; display: none; pointer-events: auto;
+    max-width: 285px; border-radius: var(--border-radius-lg); overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+    font-size: 13px;
+  }
+  .tt-header {
+    padding: 10px 14px 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tt-number {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 500; flex-shrink: 0;
+    background: rgba(255,255,255,0.25); color: #fff;
+  }
+  .tt-title { font-size: 13px; font-weight: 500; color: #fff; line-height: 1.3; }
+  .tt-body { background: #fff; padding: 10px 14px 12px; }
+  .tt-row { margin-bottom: 8px; }
+  .tt-label {
+    font-size: 10px; font-weight: 500; text-transform: uppercase;
+    letter-spacing: 0.05em; margin-bottom: 2px;
+  }
+  .tt-value { font-size: 12px; color: #1a1a1a; line-height: 1.5; }
+  .tt-divider { height: 0.5px; background: #e5e5e5; margin: 8px 0; }
+  .tt-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 4px; padding: 7px 13px;
+    border-radius: var(--border-radius-md);
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    text-decoration: none; color: #fff; border: none;
+    transition: opacity 0.15s;
+  }
+  .tt-btn:hover { opacity: 0.85; }
+  .legend-wrap { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 8px 4px 0; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--color-text-secondary); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; opacity: 0.85; }
+</style>
+
+<div id="map4"></div>
+<div class="legend-wrap" id="legend4"></div>
+<div class="tt" id="tt4"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+
+<script>
+const colors = [
+  '#1D9E75','#378ADD','#D85A30','#7F77DD','#BA7517',
+  '#D4537E','#639922','#E24B4A','#0F6E56','#993C1D',
+  '#534AB7','#185FA5','#3B6D11','#993556','#854F0B',
+  '#A32D2D','#0C447C','#3C3489'
+];
+
+const pssas = [
+  { name:"Great Barrier Reef Region", no:1, state:"Australia", measures:"IMO-recommended Australian system of pilotage; mandatory ship reporting system", mepc:"MEPC.44(30)", date:"16 Nov 1990", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.44(30).pdf", center:[-18,148.5], rx:4.5, ry:3.5, tilt:20 },
+  { name:"Torres Strait Extension", no:"1b", state:"Australia, Papua New Guinea", measures:"IMO-recommended Australian system of pilotage; two-way route", mepc:"MEPC.133(53)", date:"22 July 2005", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.133(53).pdf", center:[-9.9,142.5], rx:1.2, ry:0.9, tilt:10 },
+  { name:"South-West Coral Sea Extension", no:"1c", state:"Australia", measures:"Area to be avoided; traffic separation systems", mepc:"MEPC.268(68)", date:"May 2015", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.268(68).pdf", center:[-23.5,152.5], rx:3, ry:1.8, tilt:15 },
+  { name:"Archipelago of Sabana-Camagüey", no:2, state:"Cuba", measures:"Area to be avoided", mepc:"MEPC.74(40)", date:"25 Sep 1997", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.74(40).pdf", center:[22.8,-79.5], rx:3.2, ry:1.0, tilt:-10 },
+  { name:"Sea area around Malpelo Island", no:3, state:"Colombia", measures:"Area to be avoided", mepc:"MEPC.97(47)", date:"8 Mar 2002", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.97(47).pdf", center:[4.0,-81.6], rx:1.2, ry:1.4, tilt:0 },
+  { name:"Sea area around the Florida Keys", no:4, state:"United States", measures:"Areas to be avoided; mandatory no anchoring areas", mepc:"MEPC.98(47)", date:"8 Mar 2002", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.98(47).pdf", center:[24.6,-81.5], rx:2.5, ry:0.9, tilt:-20 },
+  { name:"Wadden Sea", no:5, state:"Netherlands, Denmark, Germany", measures:"Mandatory deep water route", mepc:"MEPC.101(48)", date:"11 Oct 2002", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.101(48).pdf", center:[54.5,8.2], rx:1.5, ry:1.1, tilt:10 },
+  { name:"Paracas National Reserve", no:6, state:"Peru", measures:"Area to be avoided", mepc:"MEPC.106(49)", date:"18 July 2003", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.106(49).pdf", center:[-13.8,-76.2], rx:1.2, ry:1.5, tilt:5 },
+  { name:"Western European Waters", no:7, state:"Belgium, France, Ireland, Portugal, Spain, United Kingdom", measures:"Mandatory ship reporting system", mepc:"MEPC.121(52)", date:"15 Oct 2004", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.121(52).pdf", center:[47,-8], rx:8, ry:6, tilt:-5 },
+  { name:"Canary Islands", no:8, state:"Spain", measures:"Areas to be avoided; traffic separation systems; recommended routes; mandatory ship reporting system", mepc:"MEPC.134(53)", date:"22 Mar 2004", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.134(53).pdf", center:[28.2,-15.5], rx:2, ry:1.2, tilt:0 },
+  { name:"Galapagos Archipelago", no:9, state:"Ecuador", measures:"Area to be avoided; mandatory ship reporting system; recommended tracks", mepc:"MEPC.135(53)", date:"22 Mar 2004", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.135(53).pdf", center:[-0.5,-90.5], rx:2, ry:2, tilt:0 },
+  { name:"Baltic Sea Area", no:10, state:"Denmark, Estonia, Finland, Germany, Latvia, Lithuania, Poland, Sweden", measures:"Traffic separation schemes; deepwater route; areas to be avoided; mandatory ship reporting system; MARPOL Special Area; MARPOL SOx ECA", mepc:"MEPC.136(53)", date:"22 Mar 2004", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.136(53).pdf", center:[59,19], rx:7, ry:4.5, tilt:15 },
+  { name:"Papahānaumokuākea Marine National Monument", no:11, state:"United States", measures:"Areas to be avoided; recommended/mandatory ship reporting system", mepc:"MEPC.171(57)", date:"4 April 2008", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.171(57).pdf", center:[25.5,-169], rx:8, ry:2, tilt:0 },
+  { name:"Strait of Bonifacio", no:12, state:"France, Italy", measures:"Recommendation on navigation", mepc:"MEPC.204(62)", date:"15 July 2011", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.204(62).pdf", center:[41.3,9.1], rx:0.7, ry:0.5, tilt:0 },
+  { name:"Saba Bank", no:13, state:"Netherlands (Kingdom of the)", measures:"Area to be avoided; mandatory no anchoring area", mepc:"MEPC.226(64)", date:"5 Oct 2012", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.226(64).pdf", center:[17.6,-63.4], rx:0.6, ry:0.5, tilt:0 },
+  { name:"Jomard Entrance", no:14, state:"Papua New Guinea", measures:"Routeing system (four two-way routes and a precautionary area)", mepc:"MEPC.283(70)", date:"28 October 2016", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.283(70).pdf", center:[-10.5,152], rx:1.2, ry:0.9, tilt:10 },
+  { name:"Tubbataha Reefs Natural Park", no:15, state:"Philippines", measures:"Area to be avoided", mepc:"MEPC.294(71)", date:"7 July 2017", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.294(71).pdf", center:[9,120], rx:0.8, ry:1.0, tilt:0 },
+  { name:"North-Western Mediterranean Sea", no:16, state:"France, Italy, Monaco, Spain", measures:"Speed reductions; appropriate safety distances; broadcasting the position of cetaceans; reporting of all collisions", mepc:"MEPC.380(80)", date:"7 July 2023", url:"https://wwwcdn.imo.org/localresources/en/KnowledgeCentre/IndexofIMOResolutions/MEPCDocuments/MEPC.380(80).pdf", center:[40.5,4.5], rx:5, ry:3, tilt:-10 }
+];
+
+function ellipseLatLngs(lat, lng, rx, ry, tiltDeg, steps) {
+  steps = steps || 64;
+  const tilt = tiltDeg * Math.PI / 180;
+  const pts = [];
+  for (let i = 0; i < steps; i++) {
+    const a = (2 * Math.PI * i) / steps;
+    const x = rx * Math.cos(a), y = ry * Math.sin(a);
+    pts.push([lat + x * Math.sin(tilt) + y * Math.cos(tilt), lng + x * Math.cos(tilt) - y * Math.sin(tilt)]);
+  }
+  pts.push(pts[0]);
+  return pts;
+}
+
+const map = L.map('map4', { zoomControl: true, scrollWheelZoom: true }).setView([20, 10], 2);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© OpenStreetMap © CartoDB', subdomains: 'abcd', maxZoom: 19
+}).addTo(map);
+
+const tt = document.getElementById('tt4');
+const legend = document.getElementById('legend4');
+let hideTimer = null;
+
+function showTT() { if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; } tt.style.display = 'block'; }
+function scheduleHide() { hideTimer = setTimeout(() => { tt.style.display = 'none'; }, 200); }
+tt.addEventListener('mouseenter', () => { if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; } });
+tt.addEventListener('mouseleave', scheduleHide);
+
+function positionTT(e) {
+  const cr = map.getContainer().getBoundingClientRect();
+  const x = e.originalEvent.clientX - cr.left;
+  const y = e.originalEvent.clientY - cr.top;
+  const tw = 285, th = 240;
+  tt.style.left = (x + 16 + tw > cr.width  ? x - tw - 12 : x + 16) + 'px';
+  tt.style.top  = (y + 16 + th > cr.height ? y - th - 12 : y + 16) + 'px';
+}
+
+pssas.forEach((p, i) => {
+  const col = colors[i % colors.length];
+  const latlngs = ellipseLatLngs(p.center[0], p.center[1], p.rx, p.ry, p.tilt || 0);
+
+  const poly = L.polygon(latlngs, { color: col, fillColor: col, fillOpacity: 0.35, weight: 2 }).addTo(map);
+
+  const li = document.createElement('div');
+  li.className = 'legend-item';
+  li.innerHTML = `<div class="legend-dot" style="background:${col}"></div><span>${p.no}. ${p.name}</span>`;
+  legend.appendChild(li);
+
+  poly.on('mouseover', function(e) {
+    this.setStyle({ fillOpacity: 0.65, weight: 3 });
+    showTT();
+    tt.innerHTML = `
+      <div class="tt-header" style="background:${col}">
+        <div class="tt-number">${p.no}</div>
+        <div class="tt-title">${p.name}</div>
+      </div>
+      <div class="tt-body">
+        <div class="tt-row">
+          <div class="tt-label" style="color:${col}">Proposing State(s)</div>
+          <div class="tt-value">${p.state}</div>
+        </div>
+        <div class="tt-divider"></div>
+        <div class="tt-row">
+          <div class="tt-label" style="color:${col}">Associated Protective Measures</div>
+          <div class="tt-value">${p.measures}</div>
+        </div>
+        <div class="tt-divider"></div>
+        <div class="tt-row">
+          <div class="tt-label" style="color:${col}">MEPC Resolution</div>
+          <div class="tt-value">${p.mepc} — ${p.date}</div>
+        </div>
+        <a class="tt-btn" href="${p.url}" target="_blank" style="background:${col}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Open MEPC Circular
+        </a>
+      </div>
+    `;
+    positionTT(e);
+  });
+
+  poly.on('mousemove', positionTT);
+
+  poly.on('mouseout', function() {
+    this.setStyle({ fillOpacity: 0.35, weight: 2 });
+    scheduleHide();
+  });
+});
+</script>
