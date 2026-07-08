@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARPOL &amp; MEPC Reference — Fleet Compliance Desk</title>
+<style>
+  :root{
+    --chart-cream:#F2ECDC;
+    --chart-line:#D8CDA8;
+    --navy:#0E2438;
+    --navy-soft:#1B3A55;
+    --ink:#1A2A33;
+    --brass:#B8813E;
+    --brass-dark:#8F5F26;
+    --paper-shadow: 0 1px 0 rgba(14,36,56,0.06);
+    --annex-1:#C4702F;
+    --annex-2:#2E7D6B;
+    --annex-3:#7A4C8A;
+    --annex-4:#5C6B73;
+    --annex-5:#3F7D4A;
+    --annex-6:#2F6FA6;
+    --mono: 'Courier New', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --serif: Georgia, 'Times New Roman', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--chart-line) 1px, transparent 1px) 0 0/100% 28px,
+      var(--chart-cream);
+    color:var(--ink);
+    font-family:var(--sans);
+    min-height:100vh;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:28px 20px 80px;}
+
+  header.hero{
+    background:var(--navy);
+    color:var(--chart-cream);
+    border-radius:10px;
+    padding:28px 28px 24px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 8px 24px rgba(14,36,56,0.25);
+  }
+  header.hero::before{
+    content:"";
+    position:absolute;
+    top:-40%;
+    right:-10%;
+    width:340px;
+    height:340px;
+    border:1px solid rgba(242,236,220,0.08);
+    border-radius:50%;
+  }
+  header.hero::after{
+    content:"";
+    position:absolute;
+    top:-40%;
+    right:-10%;
+    width:260px;
+    height:260px;
+    border:1px solid rgba(242,236,220,0.08);
+    border-radius:50%;
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-size:11px;
+    color:var(--brass);
+    margin:0 0 10px;
+  }
+  h1{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:30px;
+    margin:0 0 6px;
+    letter-spacing:.2px;
+  }
+  .hero-sub{
+    font-size:14px;
+    color:#C9D6DF;
+    max-width:560px;
+    line-height:1.5;
+    margin:0 0 20px;
+  }
+  .search-row{
+    display:flex;
+    gap:10px;
+    position:relative;
+    z-index:1;
+  }
+  #searchInput{
+    flex:1;
+    padding:13px 16px;
+    border-radius:7px;
+    border:1px solid rgba(242,236,220,0.25);
+    background:rgba(242,236,220,0.08);
+    color:var(--chart-cream);
+    font-size:15px;
+    font-family:var(--sans);
+    outline:none;
+  }
+  #searchInput::placeholder{color:#8FA3B0;}
+  #searchInput:focus{border-color:var(--brass);background:rgba(242,236,220,0.12);}
+  .count-pill{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--navy);
+    background:var(--brass);
+    padding:0 14px;
+    border-radius:7px;
+    display:flex;
+    align-items:center;
+    white-space:nowrap;
+  }
+
+  .filters{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:18px 0 6px;
+  }
+  .chip{
+    font-family:var(--mono);
+    font-size:12px;
+    padding:6px 12px;
+    border-radius:20px;
+    border:1px solid var(--chart-line);
+    background:#fff;
+    cursor:pointer;
+    color:var(--ink);
+    user-select:none;
+    transition:transform .08s ease;
+  }
+  .chip:hover{transform:translateY(-1px);}
+  .chip.active{
+    background:var(--navy);
+    color:var(--chart-cream);
+    border-color:var(--navy);
+  }
+  .chip .dot{
+    display:inline-block;
+    width:8px;height:8px;
+    border-radius:50%;
+    margin-right:6px;
+    position:relative;top:-1px;
+  }
+
+  .meta-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin:22px 0 10px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:#7A6F55;
+  }
+
+  .cards{display:flex;flex-direction:column;gap:14px;}
+  .card{
+    background:#fff;
+    border:1px solid var(--chart-line);
+    border-left:5px solid var(--annex-c, var(--brass));
+    border-radius:8px;
+    padding:18px 20px;
+    box-shadow:var(--paper-shadow);
+  }
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .badge{
+    font-family:var(--mono);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:#fff;
+    background:var(--annex-c, var(--brass));
+    padding:3px 9px;
+    border-radius:4px;
+    white-space:nowrap;
+  }
+  .reg-title{
+    font-family:var(--serif);
+    font-size:18px;
+    font-weight:700;
+    margin:8px 0 2px;
+    color:var(--navy);
+  }
+  .reg-sub{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:#8A7F63;
+    margin-bottom:10px;
+  }
+  .summary{
+    font-size:14px;
+    line-height:1.55;
+    color:var(--ink);
+    margin:0 0 12px;
+  }
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .tag{
+    font-size:11px;
+    background:var(--chart-cream);
+    border:1px solid var(--chart-line);
+    padding:2px 8px;
+    border-radius:4px;
+    color:#5A5340;
+  }
+  .rb-flag{
+    font-size:11px;
+    font-family:var(--mono);
+    color:var(--brass-dark);
+    background:#FBF3E4;
+    border:1px solid #EAD6AE;
+    padding:2px 8px;
+    border-radius:4px;
+    display:inline-block;
+    margin-bottom:12px;
+    margin-right:6px;
+  }
+  .guidelines{
+    border-top:1px dashed var(--chart-line);
+    padding-top:10px;
+    margin-top:4px;
+  }
+  .guidelines h4{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    font-family:var(--mono);
+    color:var(--navy-soft);
+    margin:0 0 8px;
+  }
+  .g-item{
+    font-size:13px;
+    line-height:1.5;
+    margin-bottom:6px;
+    padding-left:14px;
+    position:relative;
+  }
+  .g-item::before{
+    content:"—";
+    position:absolute;
+    left:0;
+    color:var(--brass);
+  }
+  .g-res{
+    font-family:var(--mono);
+    font-weight:700;
+    color:var(--navy);
+    margin-right:4px;
+  }
+
+  .notes-toggle{
+    margin-top:12px;
+    background:none;
+    border:1px solid var(--chart-line);
+    border-radius:6px;
+    padding:6px 12px;
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--navy-soft);
+    cursor:pointer;
+  }
+  .notes-toggle:hover{background:var(--chart-cream);}
+  .notes-panel{
+    display:none;
+    margin-top:10px;
+    background:var(--chart-cream);
+    border:1px solid var(--chart-line);
+    border-radius:6px;
+    padding:12px;
+  }
+  .notes-panel.open{display:block;}
+  .notes-panel textarea{
+    width:100%;
+    min-height:90px;
+    resize:vertical;
+    border:1px solid var(--chart-line);
+    border-radius:5px;
+    padding:8px 10px;
+    font-family:var(--sans);
+    font-size:13px;
+    background:#fff;
+    color:var(--ink);
+  }
+  .notes-actions{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:8px;
+  }
+  .save-btn{
+    background:var(--navy);
+    color:var(--chart-cream);
+    border:none;
+    border-radius:5px;
+    padding:6px 14px;
+    font-size:12px;
+    cursor:pointer;
+    font-family:var(--sans);
+  }
+  .save-btn:hover{background:var(--navy-soft);}
+  .save-status{font-size:11px;color:#7A6F55;font-family:var(--mono);}
+
+  .empty{
+    text-align:center;
+    padding:60px 20px;
+    color:#7A6F55;
+    font-family:var(--serif);
+    font-size:16px;
+  }
+
+  footer{
+    margin-top:36px;
+    padding-top:16px;
+    border-top:1px solid var(--chart-line);
+    font-size:12px;
+    color:#8A7F63;
+    line-height:1.6;
+  }
+  footer b{color:var(--navy-soft);}
+
+  @media (max-width:600px){
+    h1{font-size:24px;}
+    .search-row{flex-direction:column;}
+    .count-pill{align-self:flex-start;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">Fleet Environmental Compliance</p>
+    <h1>MARPOL &amp; MEPC Quick Reference</h1>
+    <p class="hero-sub">Search by topic, record book, discharge limit, or keyword to find the relevant MARPOL Annex regulation and its associated MEPC guidelines/resolutions.</p>
+    <div class="search-row">
+      <input id="searchInput" type="text" placeholder="Search e.g. &quot;garbage record book&quot;, &quot;CII rating&quot;, &quot;sludge&quot;, &quot;special area&quot;, &quot;MEPC.328&quot;…" autocomplete="off">
+      <div class="count-pill" id="countPill">0 results</div>
+    </div>
+  </header>
+
+  <div class="filters" id="filters"></div>
+
+  <div class="meta-row">
+    <span id="metaLeft">Showing all entries</span>
+    <span>Tap a card's "Team notes" to attach your vessel/office notes</span>
+  </div>
+
+  <div class="cards" id="cards"></div>
+  <div class="empty" id="emptyState" style="display:none;">No matching regulations found. Try a broader term.</div>
+
+  <footer>
+    <b>How to read this tool:</b> Entries summarize the intent of each MARPOL regulation in plain language and list the MEPC resolutions/circulars most commonly applied alongside it. This is a navigational aid, not a substitute for the official consolidated MARPOL text — always verify wording, applicability dates, and the latest amendments against the current IMO consolidated edition, IMO GISIS, or your flag administration's circulars before using this for a compliance decision.<br><br>
+    <b>Team notes:</b> notes you save here are stored so anyone opening this same reference tool can see them — treat it as a shared team scratchpad, not a private or confidential record. Don't paste anything commercially sensitive.
+  </footer>
+
+</div>
+
+<script>
+const DATA = [
+// ===================== ANNEX I — OIL =====================
+{annex:1, reg:"Reg. 1–3", title:"Definitions, Application & Exemptions", tags:["definitions","application","oil tanker","exemption"],
+summary:"Sets out what counts as an 'oil tanker', 'oily mixture', 'special area', etc., and which ships and gross tonnages Annex I applies to. Administrations may grant waivers for ships engaged solely in specific approved trades.",
+guidelines:[]},
+{annex:1, reg:"Reg. 4", title:"Exceptions to discharge prohibition", tags:["exceptions","safety","accidental discharge"],
+summary:"Discharge rules don't apply to actions taken to secure the safety of the ship or save life at sea, to accidental escapes from damage (if all reasonable precautions were taken), or to approved discharges of substances for combating pollution.",
+guidelines:[]},
+{annex:1, reg:"Reg. 12 / 12A", title:"Oil residue (sludge) tanks & fuel tank protection", tags:["sludge","construction","fuel tank protection","double hull"],
+summary:"Requires dedicated tankage for collecting oil residue (sludge) that cannot legally be discharged, plus pumping arrangements to move sludge to that tank or ashore. Reg. 12A sets fuel tank protection/location requirements to reduce oil outflow after a casualty.", recordBook:"Oil Record Book Part I",
+guidelines:[{res:"MEPC.1/Circ.642", title:"Guidance on Reg. 12A fuel tank protection interpretation"}]},
+{annex:1, reg:"Reg. 14", title:"Oil filtering equipment (15 ppm bilge separator / ODMCS)", tags:["15ppm","bilge separator","oily water separator","ows"],
+summary:"Ships of 400 GT+ must have oil filtering (separating) equipment capable of ensuring any oily mixture discharged has an oil content not exceeding 15 ppm, fitted with an alarm that stops discharge automatically when the limit is exceeded.",
+guidelines:[{res:"MEPC.107(49)", title:"Revised guidelines for systems for handling oily wastes in machinery spaces (bilge separators/OWS)"}]},
+{annex:1, reg:"Reg. 15", title:"Control of discharge of oil — machinery spaces", tags:["discharge limit","15ppm","special area","bilge water"],
+summary:"Outside special areas, discharge of oily bilge water from machinery spaces is only permitted while underway, processed through 15 ppm equipment, and not from cargo pump-room bilges of tankers. Inside special areas the same 15 ppm limit applies but with additional restrictions and no dilution allowed.", recordBook:"Oil Record Book Part I",
+guidelines:[]},
+{annex:1, reg:"Reg. 16", title:"Oil Discharge Monitoring & Control System (ODMCS)", tags:["odmcs","tanker","cargo discharge"],
+summary:"Oil tankers of 150 GT+ must fit an oil discharge monitoring and control system, plus slop tank arrangements, to automatically stop cargo-area discharges that would exceed the permitted instantaneous rate or total quantity.",
+guidelines:[]},
+{annex:1, reg:"Reg. 17", title:"Oil Record Book — Part I (Machinery space operations)", tags:["oil record book","orb","machinery space","record keeping"],
+summary:"Every ship of 400 GT+ (and every oil tanker of 150 GT+) must keep an Oil Record Book Part I, entered chronologically for each machinery-space operation (sludge transfer/disposal, bilge water discharge, bunkering, etc.), signed by the officer in charge and countersigned by the Master.", recordBook:"Oil Record Book Part I",
+guidelines:[
+  {res:"MEPC.187(59)", title:"2009 amendments to ORB entry codes and definitions (sludge, oily bilge water, oily bilge water tank)"},
+  {res:"MEPC.1/Circ.736 (as revised)", title:"Guidance for recording of operations in the Oil Record Book Part I — Machinery space operations"},
+  {res:"MEPC.312(74)", title:"Guidelines for the use of electronic record books under MARPOL (covers electronic ORB)"}
+]},
+{annex:1, reg:"Reg. 18", title:"Pumping, piping and discharge arrangements", tags:["piping","tanker design","stand-by discharge"],
+summary:"Oil tankers must be fitted with a means of stopping cargo discharge into the sea, and piping designed to avoid oil residues remaining in lines after a cargo transfer — reducing the amount that must later be treated as sludge or slop.",
+guidelines:[]},
+{annex:1, reg:"Reg. 20 / 21", title:"Segregated ballast tanks, COW & heavy-grade oil carriage", tags:["sbt","crude oil washing","cow","heavy grade oil","hgo"],
+summary:"New tankers must have segregated ballast tanks (so ballast never contacts oil cargo) or equivalent protective location, and many are required or permitted to use crude oil washing. Reg. 21 restricts carriage of heavy-grade oil as cargo in single-hull tankers.",
+guidelines:[]},
+{annex:1, reg:"Reg. 25", title:"Subdivision and damage stability (double hull)", tags:["double hull","damage stability","tanker design"],
+summary:"Sets structural and damage-stability requirements intended to limit oil outflow if the hull is breached — the basis for the double-hull requirement applying to tankers built after the relevant dates.",
+guidelines:[]},
+{annex:1, reg:"Reg. 28", title:"Operational requirements — stability instrument", tags:["stability instrument","oil tanker","survey"],
+summary:"Requires oil tankers to carry a stability instrument capable of verifying compliance with intact and damage stability requirements, so the crew can check stability before and during cargo/ballast operations.",
+guidelines:[{res:"MEPC.248(66)", title:"2014 Guidelines for verification of damage stability requirements for tankers (stability instrument)"}]},
+{annex:1, reg:"Reg. 34", title:"Control of discharge of oil — cargo areas (tankers)", tags:["discharge limit","tanker","30 litres per mile","1/30000"],
+summary:"For tanker cargo-area discharges outside special areas: the ship must be underway, more than 50 nm from land, instantaneous rate ≤30 litres/nm, total discharged oil ≤1/30,000 of cargo carried (new tankers) or 1/15,000 (existing), and ODMCS + slop tank in use. Inside special areas, discharge of oil from cargo areas is prohibited.", recordBook:"Oil Record Book Part II",
+guidelines:[]},
+{annex:1, reg:"Reg. 36", title:"Oil Record Book — Part II (Cargo/ballast operations)", tags:["oil record book","orb","cargo operations","ballast","record keeping"],
+summary:"Oil tankers of 150 GT+ must keep an Oil Record Book Part II covering loading/unloading of cargo, internal transfer, tank cleaning, ballasting/deballasting of cargo tanks, and disposal of residues — entered and signed the same way as Part I.", recordBook:"Oil Record Book Part II",
+guidelines:[{res:"MEPC.1/Circ.736 (as revised)", title:"Guidance for recording of operations in the Oil Record Book Part II — Cargo/ballast operations"}]},
+{annex:1, reg:"Reg. 37", title:"Shipboard Oil Pollution Emergency Plan (SOPEP)", tags:["sopep","emergency plan","spill response"],
+summary:"Oil tankers of 150 GT+ and other ships of 400 GT+ must carry an approved SOPEP describing the steps and contacts to follow in the event of an oil pollution incident.",
+guidelines:[{res:"MEPC.54(32), as amended by MEPC.86(44)", title:"Guidelines for the development of Shipboard Oil Pollution Emergency Plans"}]},
+{annex:1, reg:"Reg. 39", title:"Special areas & reception facilities", tags:["special area","reception facilities","antarctic","psSA"],
+summary:"Designates sea areas (e.g. Antarctic area, Baltic, Mediterranean) where stricter oil-discharge rules apply due to recognized ecological sensitivity, and requires port States bordering them to provide adequate reception facilities.",
+guidelines:[{res:"MEPC.83(44) family", title:"Guidelines for reception facilities under MARPOL"}]},
+{annex:1, reg:"Reg. 43 / 43A", title:"Antarctic & Arctic heavy fuel oil restrictions", tags:["antarctic","arctic","heavy fuel oil","hfo ban"],
+summary:"Prohibits carriage and use of heavy-grade oil in the Antarctic area outright, and — under the newer Reg. 43A — phases in a similar prohibition on use/carriage of heavy fuel oil as fuel in Arctic waters (from 1 July 2024, with exemptions/waivers running to 2029 for some flag States).",
+guidelines:[{res:"MEPC.329(76)", title:"Amendments introducing Reg. 43A — Arctic HFO ban"}]},
+
+// ===================== ANNEX II — NLS =====================
+{annex:2, reg:"Categorisation X/Y/Z/OS", title:"Noxious Liquid Substance categories", tags:["nls","categorisation","hazard category","bulk chemical"],
+summary:"Every NLS carried in bulk is placed in Category X (major hazard, discharge prohibited), Y (hazard, discharge limited), Z (minor hazard, discharge limited) or OS (Other Substances, outside categories, no restriction) based on GESAMP hazard evaluation.",
+guidelines:[{res:"MEPC.2/Circular (reissued annually)", title:"Provisional categorization of liquid substances — current list of NLS categories"}]},
+{annex:2, reg:"Reg. 6", title:"Exceptions", tags:["exceptions","safety","accidental discharge","nls"],
+summary:"As with oil, discharge restrictions don't apply where necessary for ship or life safety, or for accidental escapes where all reasonable precautions were taken.",
+guidelines:[]},
+{annex:2, reg:"Reg. 9", title:"Discharge criteria for NLS residues", tags:["discharge criteria","tank washing","prewash","nls residue"],
+summary:"Sets the speed, distance from land, depth of water, discharge rate and (for Category X) prewash requirements that must be met before tank washings containing NLS residue may be discharged.",
+guidelines:[]},
+{annex:2, reg:"Reg. 13", title:"Cargo Record Book (NLS)", tags:["cargo record book","record keeping","nls"],
+summary:"Ships carrying NLS in bulk must keep a Cargo Record Book logging loading, internal transfer, unloading, tank cleaning/prewash, ballasting of cargo tanks, and discharge of residues, in the same signed/dated format style as the Oil Record Book.", recordBook:"Cargo Record Book",
+guidelines:[]},
+{annex:2, reg:"Reg. 16", title:"Shipboard Marine Pollution Emergency Plan (SMPEP)", tags:["smpep","emergency plan","nls spill"],
+summary:"Ships certified to carry NLS in bulk must carry an approved emergency plan for pollution incidents involving noxious liquid substances, similar in purpose to the Annex I SOPEP.",
+guidelines:[{res:"MEPC.85(44), as amended", title:"Guidelines for the development of Shipboard Marine Pollution Emergency Plans for NLS"}]},
+{annex:2, reg:"P&A Manual", title:"Procedures and Arrangements Manual", tags:["p&a manual","chemical tanker","procedures"],
+summary:"Every chemical tanker must carry a ship-specific Procedures and Arrangements (P&A) Manual, approved by the Administration, describing the equipment and operational procedures required to discharge NLS residues in line with Annex II.",
+guidelines:[{res:"MEPC.18(22) family, as updated", title:"Standard format and guidelines for the P&A Manual"}]},
+
+// ===================== ANNEX III — PACKAGED HARMFUL SUBSTANCES =====================
+{annex:3, reg:"Reg. 1", title:"Application — marine pollutants", tags:["application","marine pollutant","imdg code"],
+summary:"Applies to harmful substances carried by sea in packaged form that are identified as marine pollutants in the IMDG Code; the two instruments work together, with the IMDG Code providing the detailed packing/labelling schedules.",
+guidelines:[]},
+{annex:3, reg:"Reg. 2–3", title:"Packing & marking/labelling", tags:["packing","marking","labelling","marine pollutant mark"],
+summary:"Requires packaging adequate to minimize the hazard to the marine environment, and durable marking/labelling identifying the substance as a marine pollutant, consistent with IMDG Code requirements.",
+guidelines:[]},
+{annex:3, reg:"Reg. 4", title:"Documentation", tags:["documentation","dangerous goods manifest","dg declaration"],
+summary:"Requires shipping documents (e.g. dangerous goods declaration/manifest) that clearly identify marine pollutants, so port States and the ship's crew know what's aboard.",
+guidelines:[]},
+{annex:3, reg:"Reg. 5", title:"Stowage", tags:["stowage","segregation"],
+summary:"Marine pollutants must be properly stowed and secured to minimize the hazards to the marine environment without impairing the safety of the ship and persons on board.",
+guidelines:[]},
+{annex:3, reg:"Reg. 7", title:"Exceptions", tags:["exceptions","jettison","safety"],
+summary:"Jettisoning of packaged harmful substances is prohibited except where necessary for the safety of the ship or saving life at sea.",
+guidelines:[]},
+
+// ===================== ANNEX IV — SEWAGE =====================
+{annex:4, reg:"Reg. 1–3", title:"Definitions & application", tags:["definitions","application","sewage"],
+summary:"Applies to ships of 400 GT+ and smaller certified ships carrying more than 15 persons; defines 'sewage' broadly to include drainage from toilets, medical spaces and spaces containing living animals.",
+guidelines:[]},
+{annex:4, reg:"Reg. 9", title:"Sewage systems required on board", tags:["sewage treatment plant","holding tank","comminuter"],
+summary:"Ships must be fitted with either an approved sewage treatment plant, a comminuting and disinfecting system usable with a holding tank, or a holding tank of capacity sufficient for the ship's voyage pattern.",
+guidelines:[{res:"MEPC.227(64)", title:"2012 Guidelines on implementation of effluent standards and performance tests for sewage treatment plants"}]},
+{annex:4, reg:"Reg. 11", title:"Discharge of sewage", tags:["discharge limit","holding tank","12 nautical miles"],
+summary:"Untreated sewage may only be discharged more than 12 nm from the nearest land, at a moderate rate while the ship is en route at not less than 4 knots. Sewage treated by an approved plant meeting the effluent standard may be discharged closer in, subject to flag/coastal State rules.",
+guidelines:[]},
+{annex:4, reg:"Reg. 13", title:"Baltic Sea special area — passenger ship sewage", tags:["special area","baltic sea","passenger ship"],
+summary:"Passenger ships operating in the Baltic Sea special area are subject to a stricter regime restricting sewage discharge, reflecting the Baltic's designation as a particularly sensitive area for nutrient loading.",
+guidelines:[{res:"MEPC.200(62) / MEPC.276(70)", title:"Baltic Sea passenger ship sewage discharge requirements and entry-into-force provisions"}]},
+
+// ===================== ANNEX V — GARBAGE =====================
+{annex:5, reg:"Reg. 3", title:"General discharge/disposal of garbage", tags:["discharge limit","plastics ban","food waste","cargo residues"],
+summary:"Discharge of all plastics into the sea is completely prohibited. Other garbage categories (food waste, cargo residues, cleaning agents, etc.) have graduated distance-from-land and processing requirements before disposal is permitted; most may never be discharged inside special areas.",
+guidelines:[{res:"MEPC.295(71)", title:"2017 Guidelines for the implementation of MARPOL Annex V"}]},
+{annex:5, reg:"Reg. 4", title:"Disposal within special areas", tags:["special area","garbage","food waste"],
+summary:"Within Annex V special areas (e.g. Mediterranean, Baltic, Black Sea, Red Sea, Wider Caribbean, Gulf area, North Sea, Antarctic), disposal of garbage is more tightly restricted — generally limited to food waste discharged well offshore, with plastics always prohibited.",
+guidelines:[{res:"MEPC.382(80)", title:"Designation of the Red Sea Special Area under Annex V (applicable from 1 January 2025)"}]},
+{annex:5, reg:"Reg. 6", title:"Exceptions", tags:["exceptions","fishing gear","safety"],
+summary:"Discharge restrictions don't apply for safety of the ship/crew, accidental loss, or accidental loss of fishing gear (with an obligation to take reasonable steps to prevent/minimize loss), among other narrow exceptions.",
+guidelines:[]},
+{annex:5, reg:"Reg. 7", title:"Port reception facilities", tags:["reception facilities","port","garbage"],
+summary:"Requires port States to provide adequate facilities to receive garbage from ships without causing undue delay, so ships aren't forced into non-compliant disposal at sea.",
+guidelines:[]},
+{annex:5, reg:"Reg. 10", title:"Placards, garbage management plan & Garbage Record Book", tags:["garbage record book","grb","garbage management plan","placard","record keeping"],
+summary:"Ships of 100 GT+ (lowered from 400 GT in 2024) and fixed/floating platforms must display placards on discharge restrictions, carry a garbage management plan, and — for ships of 100 GT+ or certified to carry 15+ persons on international voyages — maintain a Garbage Record Book logging each discharge or incineration event.", recordBook:"Garbage Record Book",
+guidelines:[{res:"MEPC.360(79)", title:"Amendments lowering the Garbage Record Book threshold to ships of 100 GT and above (effective 1 May 2024)"}]},
+
+// ===================== ANNEX VI — AIR / GHG =====================
+{annex:6, reg:"Reg. 13", title:"Nitrogen oxides (NOx) — Tiers I–III & ECAs", tags:["nox","tier iii","emission control area","eca","engine"],
+summary:"Sets NOx emission limits for marine diesel engines above 130 kW, based on the engine's construction date (Tier I/II) and, when operating inside a designated NOx Emission Control Area, the stricter Tier III limit for engines built on/after the ECA's effective date.",
+guidelines:[{res:"NOx Technical Code 2008, as amended (e.g. by MEPC.398(83))", title:"Testing, survey and certification procedures for compliance with Reg. 13"}]},
+{annex:6, reg:"Reg. 14", title:"Sulphur oxides (SOx) & particulate matter", tags:["sox","sulphur cap","scrubber","egcs","eca"],
+summary:"Global fuel sulphur limit is 0.50% m/m (reduced from 3.50% on 1 January 2020); inside a SOx ECA the limit is 0.10% m/m. Ships may instead use an Exhaust Gas Cleaning System (scrubber) or an alternative compliant fuel to meet the equivalent emission reduction.",
+guidelines:[{res:"MEPC.259(68) / MEPC.340(77)", title:"2015/2021 Guidelines for exhaust gas cleaning systems (EGCS)"}]},
+{annex:6, reg:"Reg. 15", title:"Volatile Organic Compounds (VOC)", tags:["voc","tanker","vapour"],
+summary:"Tankers carrying crude oil must have an approved VOC Management Plan if calling at a port where VOC emissions are regulated, describing procedures to minimize VOC emissions during loading and transit.",
+guidelines:[]},
+{annex:6, reg:"Reg. 16", title:"Shipboard incineration", tags:["incinerator","shipboard incineration"],
+summary:"Restricts what may be burned in a shipboard incinerator (e.g. prohibits incineration of certain plastics, PCBs, sewage sludge/sludge oil in port) and requires approved incinerator design for units installed after specified dates.",
+guidelines:[]},
+{annex:6, reg:"Reg. 18", title:"Fuel oil quality & Bunker Delivery Note", tags:["bunker delivery note","bdn","fuel oil quality","sampling"],
+summary:"Fuel oil supplied to ships must meet quality/sulphur requirements and be accompanied by a Bunker Delivery Note with a representative sample retained; recent amendments extend BDN requirements to low-flashpoint and gas fuels.",
+guidelines:[
+  {res:"MEPC.324(75)", title:"Requirements for in-use/onboard fuel oil sampling and sampling points (into force 1 Apr 2022)"},
+  {res:"MSC-MEPC.2/Circ.18", title:"Updated 2020 fuel oil sampling guidelines"}
+]},
+{annex:6, reg:"Reg. 20 / 21", title:"Energy Efficiency Design Index (EEDI)", tags:["eedi","new ship","design efficiency"],
+summary:"New ships above defined size thresholds must meet an Attained EEDI at or below the Required EEDI for their ship type, which tightens in stages over time — a design-stage measure of CO2 efficiency per unit of transport work.",
+guidelines:[{res:"MEPC.308(73)", title:"2018 Guidelines on the method of calculation of the attained EEDI for new ships"},
+{res:"MEPC.365(79), as amended", title:"Guidelines on survey and certification of the EEDI"}]},
+{annex:6, reg:"Reg. 23 / 25", title:"Energy Efficiency Existing Ship Index (EEXI)", tags:["eexi","existing ship","design efficiency"],
+summary:"Existing ships must calculate an Attained EEXI (a one-off technical assessment, not recalculated annually) and demonstrate it meets the Required EEXI, verified at the first survey after 1 January 2023.",
+guidelines:[{res:"MEPC.351(78)", title:"2022 Guidelines on survey and certification of the attained EEXI"},
+{res:"MEPC.328(76)", title:"Amendments introducing EEXI and CII requirements"}]},
+{annex:6, reg:"Reg. 26", title:"Ship Energy Efficiency Management Plan (SEEMP)", tags:["seemp","energy efficiency plan"],
+summary:"Every ship must carry a SEEMP: Part I covers general energy-efficiency measures, Part II covers the fuel oil data collection methodology, and Part III (for applicable ships) sets the operational CII implementation plan.",
+guidelines:[{res:"MEPC.395(82)", title:"2024 Guidelines for the development of a SEEMP (supersedes MEPC.346(78))"}]},
+{annex:6, reg:"Reg. 27", title:"IMO Data Collection System (DCS)", tags:["dcs","data collection","fuel consumption reporting"],
+summary:"Ships of 5,000 GT+ must collect and report annual fuel oil consumption and related data to their flag Administration, which is then submitted to the IMO Ship Fuel Oil Consumption Database. Recent amendments add transport-work data and finer reporting granularity.",
+guidelines:[{res:"MEPC.385(81)", title:"Amendments to Appendix IX (DCS data fields) — enhanced granularity, transport work (into force 1 Aug 2025)"},
+{res:"MEPC.1/Circ.913", title:"Guidance on applying the Appendix IX amendments / implementation timeline"}]},
+{annex:6, reg:"Reg. 28", title:"Carbon Intensity Indicator (CII)", tags:["cii","carbon intensity","rating a-e"],
+summary:"Ships of 5,000 GT+ in scope must calculate an annual operational CII and are rated A–E against a required trajectory that tightens each year. Ships rated D for three consecutive years, or E once, must produce a corrective action plan within their SEEMP.",
+guidelines:[{res:"MEPC.338(76)", title:"2021 Guidelines on the operational CII calculation methodology"},
+{res:"MEPC.339(76)", title:"2021 Guidelines on the reference lines for use with operational CII"},
+{res:"MEPC.400(83)", title:"Updated annual CII reduction factors beyond 2026"}]},
+{annex:6, reg:"Reg. 43A", title:"Heavy fuel oil ban in Arctic waters", tags:["arctic","heavy fuel oil","hfo ban"],
+summary:"Prohibits use and carriage of heavy fuel oil as fuel by ships in Arctic waters from 1 July 2024, with a delayed compliance date to 1 July 2029 available to certain Arctic coastal States for their own-flag vessels.",
+guidelines:[{res:"MEPC.329(76)", title:"Amendments introducing the Arctic HFO ban"}]},
+{annex:6, reg:"Ch. 5 (developing)", title:"Net-zero framework / mid-term GHG measures", tags:["net zero","ghg levy","fuel standard","2025 amendments"],
+summary:"IMO's mid-term GHG measures — a global marine fuel GHG intensity standard plus an economic (pricing) element — were approved for a new Chapter 5 of Annex VI at MEPC 83, with adoption considered at the extraordinary MEPC session in late 2025. Track this as a fast-moving area; confirm current status before relying on it.",
+guidelines:[{res:"MEPC/ES.2 outputs", title:"Draft revised MARPOL Annex VI text for the IMO Net-Zero Framework (status evolving — verify latest)"}]},
+{annex:6, reg:"Electronic record books", title:"Electronic record book guidelines (cross-Annex)", tags:["electronic record book","erb","orb","grb"],
+summary:"Where flag Administrations permit it, the Oil Record Book, Cargo Record Book, Garbage Record Book and others may be kept electronically instead of on paper, provided the system meets IMO's functional requirements.",
+guidelines:[{res:"MEPC.312(74)", title:"Guidelines for the use of electronic record books under MARPOL"}]},
+];
+
+const ANNEX_META = {
+  1:{name:"Annex I", full:"Oil", color:"var(--annex-1)"},
+  2:{name:"Annex II", full:"Noxious Liquid Substances", color:"var(--annex-2)"},
+  3:{name:"Annex III", full:"Packaged Harmful Substances", color:"var(--annex-3)"},
+  4:{name:"Annex IV", full:"Sewage", color:"var(--annex-4)"},
+  5:{name:"Annex V", full:"Garbage", color:"var(--annex-5)"},
+  6:{name:"Annex VI", full:"Air Pollution / GHG", color:"var(--annex-6)"},
+};
+
+let activeAnnex = null;
+let searchTerm = "";
+
+function buildFilters(){
+  const container = document.getElementById('filters');
+  const allChip = document.createElement('div');
+  allChip.className = 'chip active';
+  allChip.textContent = 'All Annexes';
+  allChip.onclick = () => { activeAnnex = null; render(); };
+  container.appendChild(allChip);
+  Object.keys(ANNEX_META).forEach(k=>{
+    const m = ANNEX_META[k];
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.innerHTML = `<span class="dot" style="background:${m.color}"></span>${m.name} — ${m.full}`;
+    chip.onclick = () => { activeAnnex = Number(k); render(); };
+    chip.dataset.annex = k;
+    container.appendChild(chip);
+  });
+}
+
+function matches(entry, term){
+  if(!term) return true;
+  const hay = [
+    entry.reg, entry.title, entry.summary, entry.recordBook||"",
+    ...(entry.tags||[]),
+    ...(entry.guidelines||[]).map(g=>g.res+" "+g.title)
+  ].join(" ").toLowerCase();
+  return term.toLowerCase().split(/\s+/).filter(Boolean).every(t=>hay.includes(t));
+}
+
+async function loadNote(id){
+  try{
+    const r = await window.storage.get('note:'+id, true);
+    return r ? r.value : "";
+  }catch(e){ return ""; }
+}
+async function saveNote(id, value){
+  try{
+    await window.storage.set('note:'+id, value, true);
+    return true;
+  }catch(e){ return false; }
+}
+
+function cardId(entry, idx){
+  return 'a'+entry.annex+'-'+idx;
+}
+
+function render(){
+  const term = searchTerm.trim();
+  const container = document.getElementById('cards');
+  const empty = document.getElementById('emptyState');
+  container.innerHTML = "";
+
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  if(activeAnnex===null){
+    document.querySelector('.chip').classList.add('active');
+  }else{
+    const el = document.querySelector(`.chip[data-annex="${activeAnnex}"]`);
+    if(el) el.classList.add('active');
+  }
+
+  let shown = 0;
+  DATA.forEach((entry, idx)=>{
+    if(activeAnnex!==null && entry.annex!==activeAnnex) return;
+    if(!matches(entry, term)) return;
+    shown++;
+    const meta = ANNEX_META[entry.annex];
+    const id = cardId(entry, idx);
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.setProperty('--annex-c', meta.color);
+
+    const guidelinesHtml = (entry.guidelines && entry.guidelines.length) ? `
+      <div class="guidelines">
+        <h4>Related MEPC Guidance</h4>
+        ${entry.guidelines.map(g=>`<div class="g-item"><span class="g-res">${g.res}</span>${g.title}</div>`).join("")}
+      </div>` : "";
+
+    const rbHtml = entry.recordBook ? `<span class="rb-flag">📓 ${entry.recordBook}</span>` : "";
+
+    card.innerHTML = `
+      <div class="card-top">
+        <span class="badge">${meta.name} — ${meta.full}</span>
+      </div>
+      <div class="reg-title">${entry.title}</div>
+      <div class="reg-sub">MARPOL ${meta.name}, ${entry.reg}</div>
+      <p class="summary">${entry.summary}</p>
+      ${rbHtml}
+      <div class="tags">${(entry.tags||[]).map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+      ${guidelinesHtml}
+      <button class="notes-toggle" data-id="${id}">+ Team notes</button>
+      <div class="notes-panel" id="panel-${id}">
+        <textarea id="ta-${id}" placeholder="Paste an internal excerpt, a flag-state clarification, a vessel-specific note, or a link to your own SOP here…"></textarea>
+        <div class="notes-actions">
+          <button class="save-btn" data-id="${id}">Save note</button>
+          <span class="save-status" id="status-${id}"></span>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  document.getElementById('countPill').textContent = shown + (shown===1 ? ' result' : ' results');
+  document.getElementById('metaLeft').textContent = activeAnnex ? `Filtered: ${ANNEX_META[activeAnnex].name}` : 'Showing all entries';
+  empty.style.display = shown===0 ? 'block' : 'none';
+
+  document.querySelectorAll('.notes-toggle').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.dataset.id;
+      const panel = document.getElementById('panel-'+id);
+      const isOpen = panel.classList.contains('open');
+      if(!isOpen){
+        panel.classList.add('open');
+        btn.textContent = '− Team notes';
+        const ta = document.getElementById('ta-'+id);
+        if(!ta.dataset.loaded){
+          ta.value = "Loading…";
+          const val = await loadNote(id);
+          ta.value = val;
+          ta.dataset.loaded = "1";
+        }
+      }else{
+        panel.classList.remove('open');
+        btn.textContent = '+ Team notes';
+      }
+    });
+  });
+
+  document.querySelectorAll('.save-btn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.dataset.id;
+      const ta = document.getElementById('ta-'+id);
+      const status = document.getElementById('status-'+id);
+      status.textContent = 'Saving…';
+      const ok = await saveNote(id, ta.value);
+      status.textContent = ok ? 'Saved ✓' : 'Save failed — try again';
+      setTimeout(()=>{ if(status.textContent==='Saved ✓') status.textContent=''; }, 2500);
+    });
+  });
+}
+
+document.getElementById('searchInput').addEventListener('input', (e)=>{
+  searchTerm = e.target.value;
+  render();
+});
+
+buildFilters();
+render();
+</script>
+</body>
+</html>
